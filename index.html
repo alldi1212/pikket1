@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jadwal Piket Mahasiswa</title>
+
+    <style>
+        body {
+            font-family: Poppins, Arial, sans-serif;
+            margin: 0;
+            padding: 30px;
+            min-height: 100vh;
+            background: url("foto1.png") center/cover fixed no-repeat;
+            position: relative;
+            color: white;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45); 
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: -1;
+        }
+
+        h1, h2 {
+            text-align: center;
+            margin: 5px 0;
+        }
+
+        .card {
+            max-width: 700px;
+            margin: auto;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 18px;
+            padding: 20px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        th {
+            background: rgba(0, 0, 0, 0.45);
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.20);
+        }
+
+        .fade {
+            animation: fadeChange 0.6s forwards;
+        }
+
+        @keyframes fadeChange {
+            0% { opacity: 0; transform: translateY(15px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(0,0,0,0.85);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 15px; }
+            table, th, td { font-size: 14px; }
+            .card { padding: 15px; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Jadwal Piket Mahasiswa</h1>
+    <h2 id="judulMinggu">Minggu ...</h2>
+
+    <div class="card fade">
+        <table id="tabelPiket">
+            <tr><th>Hari</th><th>Mahasiswa</th></tr>
+        </table>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        const mahasiswa = [
+            "ALDI","ALEX","ALFI","ARIEL","DHANI","EDO","ERGI","FARHAN",
+            "HANIF","IDRIS","ILYAS","IRSYAD","RAHMAN","RIJAL","SILA",
+            "TITO","WAHYU","ZAKIYA","ZETIA"
+        ];
+
+        const hari = ["Senin","Selasa","Rabu","Kamis"];
+
+        // Fungsi membagi mahasiswa menjadi grup 3 per hari untuk 4 minggu
+        function generateJadwal(mahasiswa, hari, mingguCount = 4){
+            const jadwal = [];
+            let idx = 0;
+            for(let m=0; m<mingguCount; m++){
+                const dataMinggu = [];
+                for(let h=0; h<hari.length; h++){
+                    const grup = [];
+                    for(let g=0; g<3; g++){
+                        grup.push(mahasiswa[idx % mahasiswa.length]);
+                        idx++;
+                    }
+                    dataMinggu.push([hari[h], grup.join(", ")]);
+                }
+                jadwal.push({ minggu: `Minggu ${m+1}`, data: dataMinggu });
+            }
+            return jadwal;
+        }
+
+        const jadwal = generateJadwal(mahasiswa, hari);
+
+        function getMingguKe() {
+            const now = new Date();
+            const tanggal = now.getDate();
+            return Math.ceil(tanggal / 7);
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.classList.add("show");
+            setTimeout(() => {
+                toast.classList.remove("show");
+            }, 3000);
+        }
+
+        function tampilkanMinggu() {
+            const mingguKe = getMingguKe();
+            let index = Math.min(mingguKe - 1, jadwal.length - 1);
+
+            const judul = document.getElementById("judulMinggu");
+            const tabel = document.getElementById("tabelPiket");
+
+            judul.textContent = jadwal[index].minggu;
+            tabel.innerHTML = "<tr><th>Hari</th><th>Mahasiswa</th></tr>";
+
+            jadwal[index].data.forEach(baris => {
+                tabel.innerHTML += `
+                    <tr>
+                        <td>${baris[0]}</td>
+                        <td>${baris[1]}</td>
+                    </tr>
+                `;
+            });
+
+            const card = document.querySelector(".card");
+            card.classList.remove("fade");
+            void card.offsetWidth;
+            card.classList.add("fade");
+
+            showToast(`Jadwal ${jadwal[index].minggu} piket woyyyy!`);
+        }
+
+        tampilkanMinggu();
+    </script>
+
+</body>
+</html>
